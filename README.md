@@ -1,24 +1,12 @@
-## This repo is looking for maintainers! Please reach out if interested.
+## This repo is inactive! But we'll accept Pull Requests.
 
 --------
 
 
-# NOMP ![NOMP Logo](http://zone117x.github.io/node-open-mining-portal/logo.svg "NOMP Logo")
-#### Node Open Mining Portal
+# excc-NOMP
+#### ExchangeCoin-ready  Node Open Mining Portal
 
-This portal is an extremely efficient, highly scalable, all-in-one, easy to setup cryptocurrency mining pool written
-entirely in Node.js. It contains a stratum poolserver; reward/payment/share processor; and a (*not yet completed*)
-responsive user-friendly front-end website featuring mining instructions, in-depth live statistics, and an admin center.
-
-#### Production Usage Notice
-This is beta software. All of the following are things that can change and break an existing NOMP setup: functionality of any feature, structure of configuration files and structure of redis data. If you use this software in production then *DO NOT* pull new code straight into production usage because it can and often will break your setup and require you to tweak things like config files or redis data.
-
-#### Paid Solution
-Usage of this software requires abilities with sysadmin, database admin, coin daemons, and sometimes a bit of programming. Running a production pool can literally be more work than a full-time job. 
-
-
-**Coin switching & auto-exchanging for payouts in BTC/LTC** to miners is a feature that very likely will not be included in this project. 
-
+This portal is an ExchangeCoin-ready port of NOMP.
 
 #### Table of Contents
 * [Features](#features)
@@ -114,15 +102,8 @@ didn't follow the instructions in this README. Please __read the usage instructi
 
 If your pool uses NOMP let us know and we will list your website here.
 
-##### Some pools using NOMP or node-stratum-module:
-* http://clevermining.com
-* http://suchpool.pw
-* http://hashfaster.com
-* http://miningpoolhub.com
-* http://kryptochaos.com
-* http://miningpools.tk
-* http://umine.co.uk
-
+##### Some pools using excc-NOMP:
+* EMPTY!
 Usage
 =====
 
@@ -142,19 +123,19 @@ you are using - a good place to start with redis is [data persistence](http://re
 
 
 #### 0) Setting up coin daemon
-Follow the build/install instructions for your coin daemon. Your coin.conf file should end up looking something like this:
+Follow the build/install instructions for your coin daemon. Your exccd.conf file should end up looking something like this:
 ```
 daemon=1
-rpcuser=litecoinrpc
-rpcpassword=securepassword
-rpcport=19332
+rpcuser=exccd-user
+rpcpassword=exccd-password
+rpclisten=8109
 ```
 For redundancy, its recommended to have at least two daemon instances running in case one drops out-of-sync or offline,
 all instances will be polled for block/transaction updates and be used for submitting blocks. Creating a backup daemon
 involves spawning a daemon using the `-datadir=/backup` command-line argument which creates a new daemon instance with
 it's own config directory and coin.conf file. Learn about the daemon, how to use it and how it works if you want to be
 a good pool operator. For starters be sure to read:
-   * https://en.bitcoin.it/wiki/Running_bitcoind
+   * https://github.com/EXCCoin/exccd
    * https://en.bitcoin.it/wiki/Data_directory
    * https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_Calls_list
    * https://en.bitcoin.it/wiki/Difficulty
@@ -164,8 +145,8 @@ a good pool operator. For starters be sure to read:
 Clone the repository and run `npm update` for all the dependencies to be installed:
 
 ```bash
-git clone https://github.com/zone117x/node-open-mining-portal.git nomp
-cd nomp
+git clone https://github.com/majudev/excc-nomp.git excc-nomp
+cd excc-nomp
 npm update
 ```
 
@@ -337,35 +318,8 @@ Explanation for each field:
 }
 ````
 
-
-##### Coin config
-Inside the `coins` directory, ensure a json file exists for your coin. If it does not you will have to create it.
-Here is an example of the required fields:
-````javascript
-{
-    "name": "Litecoin",
-    "symbol": "ltc",
-    "algorithm": "scrypt",
-
-    /* Magic value only required for setting up p2p block notifications. It is found in the daemon
-       source code as the pchMessageStart variable.
-       For example, litecoin mainnet magic: http://git.io/Bi8YFw
-       And for litecoin testnet magic: http://git.io/NXBYJA */
-    "peerMagic": "fbc0b6db", //optional
-    "peerMagicTestnet": "fcc1b7dc" //optional
-
-    //"txMessages": false, //options - defaults to false
-
-    //"mposDiffMultiplier": 256, //options - only for x11 coins in mpos mode
-}
-````
-
-For additional documentation how to configure coins and their different algorithms
-see [these instructions](//github.com/zone117x/node-stratum-pool#module-usage).
-
-
 ##### Pool config
-Take a look at the example json file inside the `pool_configs` directory. Rename it to `yourcoin.json` and change the
+Take a look at the `excc_example.json` file inside the `pool_configs` directory. Rename it to `excc.json` and change the
 example fields to fit your setup.
 
 Description of options:
@@ -373,7 +327,7 @@ Description of options:
 ````javascript
 {
     "enabled": true, //Set this to false and a pool will not be created from this config file
-    "coin": "litecoin.json", //Reference to coin config file in 'coins' directory
+    "coin": "exchangecoin.json", //Reference to coin config file in 'coins' directory
 
     "address": "mi4iBXbBsydtcc5yFmsff2zCFVX4XG7qJc", //Address to where block rewards are given
 
@@ -403,14 +357,14 @@ Description of options:
            payments less frequently (they dislike). Opposite for a lower minimum payment. */
         "minimumPayment": 0.01,
 
-        /* This daemon is used to send out payments. It MUST be for the daemon that owns the
-           configured 'address' that receives the block rewards, otherwise the daemon will not
-           be able to confirm blocks or send out payments. */
+        /* This daemon is used to send out payments. It MUST be the exccwallet daemon that owns
+           the configured 'address' that receives the block rewards, otherwise the daemon will
+           not be able to confirm blocks or send out payments. */
         "daemon": {
             "host": "127.0.0.1",
-            "port": 19332,
-            "user": "testuser",
-            "password": "testpass"
+            "port": 8110,
+            "user": "exccwallet-user",
+            "password": "exccwallet-pass"
         }
     },
 
@@ -436,34 +390,16 @@ Description of options:
         }
     },
 
-    /* More than one daemon instances can be setup in case one drops out-of-sync or dies. */
+    /* More than one daemon instances can be setup in case one drops out-of-sync or dies. 
+       It's worth noting that it should be the dcrd instance, not dcrwallet.*/
     "daemons": [
         {   //Main daemon instance
             "host": "127.0.0.1",
-            "port": 19332,
-            "user": "testuser",
-            "password": "testpass"
+            "port": 8109,
+            "user": "exccd-user",
+            "password": "exccd-pass"
         }
     ],
-
-    /* This allows the pool to connect to the daemon as a node peer to receive block updates.
-       It may be the most efficient way to get block updates (faster than polling, less
-       intensive than blocknotify script). It requires the additional field "peerMagic" in
-       the coin config. */
-    "p2p": {
-        "enabled": false,
-
-        /* Host for daemon */
-        "host": "127.0.0.1",
-
-        /* Port configured for daemon (this is the actual peer port not RPC port) */
-        "port": 19333,
-
-        /* If your coin daemon is new enough (i.e. not a shitcoin) then it will support a p2p
-           feature that prevents the daemon from spamming our peer node with unnecessary
-           transaction data. Assume its supported but if you have problems try disabling it. */
-        "disableTransactions": true
-    },
     
     /* Enabled this mode and shares will be inserted into in a MySQL database. You may also want
        to use the "emitInvalidBlockHashes" option below if you require it. The config options
@@ -494,7 +430,7 @@ For more information on these configuration options see the [pool module documen
 
 
 
-##### [Optional, recommended] Setting up blocknotify
+##### [Optional, recommended] Setting up blocknotify (TODO)
 1. In `config.json` set the port and password for `blockNotifyListener`
 2. In your daemon conf file set the `blocknotify` command to use:
 ```
@@ -525,10 +461,10 @@ output from NOMP.
 * Use [New Relic](http://newrelic.com/) to monitor your NOMP instance and server performance.
 
 
-#### Upgrading NOMP
-When updating NOMP to the latest code its important to not only `git pull` the latest from this repo, but to also update
+#### Upgrading excc-NOMP
+When updating excc-NOMP to the latest code its important to not only `git pull` the latest from this repo, but to also update
 the `node-stratum-pool` and `node-multi-hashing` modules, and any config files that may have been changed.
-* Inside your NOMP directory (where the init.js script is) do `git pull` to get the latest NOMP code.
+* Inside your excc-NOMP directory (where the init.js script is) do `git pull` to get the latest excc-NOMP code.
 * Remove the dependenices by deleting the `node_modules` directory with `rm -r node_modules`.
 * Run `npm update` to force updating/reinstalling of the dependencies.
 * Compare your `config.json` and `pool_configs/coin.json` configurations to the latest example ones in this repo or the ones in the setup instructions where each config field is explained. You may need to modify or add any new changes.
