@@ -9,52 +9,17 @@ var util = require('stratum-pool/lib/util.js');
 
 module.exports = function(logger){
 
-    var poolConfigs = JSON.parse(process.env.pools);
+    var portalConfig = JSON.parse(process.env.portalConfig);
+    var poolConfig = portalConfig.pool;
 
-    var enabledPools = [];
-
-    Object.keys(poolConfigs).forEach(function(coin) {
-        var poolOptions = poolConfigs[coin];
-        if (poolOptions.paymentProcessing &&
-            poolOptions.paymentProcessing.enabled)
-            enabledPools.push(coin);
-    });
-
-    async.filter(enabledPools, function(coin, callback){
-        SetupForPool(logger, poolConfigs[coin], function(setupResults){
-            callback(setupResults);
-        });
-    }, function(coins){
-        coins.forEach(function(coin){
-
-            var poolOptions = poolConfigs[coin];
-            var processingConfig = poolOptions.paymentProcessing;
-            var logSystem = 'Payments';
-            var logComponent = coin;
-
-            logger.debug(logSystem, logComponent, 'Payment processing setup to run every '
-                + processingConfig.paymentInterval + ' second(s) with daemon ('
-                + processingConfig.daemon.user + '@' + processingConfig.daemon.host + ':' + processingConfig.daemon.port
-                + ') and redis (' + poolOptions.redis.host + ':' + poolOptions.redis.port + ')');
-
-        });
-    });
-};
-
-
-function SetupForPool(logger, poolOptions, setupFinished){
-
-
-    var coin = poolOptions.coin.name;
-    var processingConfig = poolOptions.paymentProcessing;
-
+    var processingConfig = poolConfig.paymentProcessing;
     var logSystem = 'Payments';
-    var logComponent = coin;
+    var logComponent = 'ExchangeCoin';
 
     var daemon = new Stratum.daemon.interface([processingConfig.daemon], function(severity, message){
         logger[severity](logSystem, logComponent, message);
     });
-    var redisClient = redis.createClient(poolOptions.redis.port, poolOptions.redis.host);
+    var redisClient = redis.createClient(portalConfig.redis.port, portalConfig.redis.host);
 
     var magnitude;
     var minPaymentSatoshis;
@@ -64,13 +29,13 @@ function SetupForPool(logger, poolOptions, setupFinished){
 
     async.parallel([
         function(callback){
-            daemon.cmd('validateaddress', [poolOptions.address], function(result) {
+            daemon.cmd('validateaddress', [poolConfig.address], function(result) {
                 if (result.error){
                     logger.error(logSystem, logComponent, 'Error with payment processing daemon ' + JSON.stringify(result.error));
                     callback(true);
                 }
                 else if (!result.response || !result.response.ismine) {
-                            daemon.cmd('getaddressinfo', [poolOptions.address], function(result) {
+                            daemon.cmd('getaddressinfo', [poolConfig.address], function(result) {
                         if (result.error){
                             logger.error(logSystem, logComponent, 'Error with payment processing daemon, getaddressinfo failed ... ' + JSON.stringify(result.error));
                             callback(true);
@@ -205,7 +170,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                     return ['gettransaction', [r.txHash]];
                 });
 
-                batchRPCcommand.push(['getaccount', [poolOptions.address]]);
+                batchRPCcommand.push(['getaccount', [poolConfig.address]]);
 
                 startRPCTimer();
                 daemon.batchCmd(batchRPCcommand, function(error, txDetails){
@@ -246,7 +211,7 @@ function SetupForPool(logger, poolOptions, setupFinished){
                         }
 
                         var generationTx = tx.result.details.filter(function(tx){
-                            return tx.address === poolOptions.address;
+                            return tx.address === poolConfig.address;
                         })[0];
 
 
@@ -532,10 +497,18 @@ function SetupForPool(logger, poolOptions, setupFinished){
 
     var getProperAddress = function(address){
         if (address.length === 40){
-            return util.addressFromEx(poolOptions.address, address);
+            return util.addressFromEx(poolConfig.address, address);
         }
         else return address;
     };
 
 
-}
+
+
+
+
+    logger.debug(logSystem, logComponent, 'Payment processing setup to run every '
+        + processingConfig.paymentInterval + ' second(s) with daemon ('
+        + processingConfig.daemon.user + '@' + processingConfig.daemon.host + ':' + processingConfig.daemon.port
+        + ') and redis (' + portalConfig.redis.host + ':' + portalConfig.redis.port + ')');
+};
