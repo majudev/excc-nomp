@@ -33,6 +33,14 @@
     "pool": {
         "address": "Tso9V5g2AZmK4GwWtRqwTHdRxziQDt3hG4N",
 
+        "coin": {
+            "name": "ExchangeCoin",
+            "symbol": "EXCC",
+            "algorithm": "equihash-1445",
+            "hasGetInfo": true,
+            "reward": "POS"
+        },
+
         "rewardRecipients": { 
             "n37vuNFkXfk15uFnGoVyHZ6PYQxppD3QqK": 1.5,
             "22851477d63a085dbc2398c8430af1c09e7343f6": 0.1
