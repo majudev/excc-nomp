@@ -21,7 +21,7 @@ module.exports = function(logger, portalConfig){
 
     var forkId = process.env.forkId;
     var logSystem = 'Pool';
-    var logComponent = 'ExchangeCoin';
+    var logComponent = portalConfig.pool.coin.name;
     var logSubCat = 'Thread ' + (parseInt(forkId) + 1);
 
     var connection = redis.createClient(redisConfig.port, redisConfig.host);

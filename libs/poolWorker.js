@@ -11,8 +11,6 @@ module.exports = function(logger){
 
     var portalConfig = JSON.parse(process.env.portalConfig);
     var poolConfig  = portalConfig.pool;
-    poolConfig.coin = { "algorithm":"equihash-1445" }; //This is for node-stratum-pool compatibility only.
-
     var forkId = process.env.forkId;
 
     var proxySwitch = {};
@@ -46,7 +44,7 @@ module.exports = function(logger){
     });
 
     var logSystem = 'Pool';
-    var logComponent = 'ExchangeCoin';
+    var logComponent = poolConfig.coin.name;
     var logSubCat = 'Thread ' + (parseInt(forkId) + 1);
 
     var handlers = {

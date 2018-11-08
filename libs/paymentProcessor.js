@@ -14,7 +14,7 @@ module.exports = function(logger){
 
     var processingConfig = poolConfig.paymentProcessing;
     var logSystem = 'Payments';
-    var logComponent = 'ExchangeCoin';
+    var logComponent = poolConfig.coin.name;
 
     var daemon = new Stratum.daemon.interface([processingConfig.daemon], function(severity, message){
         logger[severity](logSystem, logComponent, message);

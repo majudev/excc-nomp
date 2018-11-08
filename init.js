@@ -88,7 +88,7 @@ if (cluster.isWorker){
 var spawnPoolWorkers = function(){
 
     if (!Array.isArray(poolConfig.daemons) || poolConfig.daemons.length < 1){
-        logger.error('Master', 'ExchangeCoin', 'No daemons configured so a pool cannot be started for this coin.');
+        logger.error('Master', poolConfig.coin.name, 'No daemons configured so a pool cannot be started for this coin.');
         return;
     }
 
