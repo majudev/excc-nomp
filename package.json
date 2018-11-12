@@ -32,7 +32,7 @@
         "url": "https://github.com/majudev/excc-nomp.git"
     },
     "dependencies": {
-        "stratum-pool": "git://github.com/majudev/excc-node-stratum-pool.git",
+        "stratum": "*",
         "dateformat": "1.0.12",
         "node-json-minify": "*",
         "redis": "0.12.1",
@@ -50,6 +50,6 @@
         "extend": "*"
     },
     "engines": {
-        "node": ">=0.10"
+        "node": ">=8.0"
     }
 }
