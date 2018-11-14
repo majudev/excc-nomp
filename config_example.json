@@ -59,25 +59,6 @@
             }
         },
 
-        "ports": {
-            "3008": {
-                "diff": 8
-            },
-            "3032": {
-                "diff": 32,
-                "varDiff": {
-                    "minDiff": 8,
-                    "maxDiff": 512,
-                    "targetTime": 15,
-                    "retargetTime": 90,
-                    "variancePercent": 30
-                }
-            },
-            "3256": {
-                "diff": 256
-            }
-        },
-
         "daemons": [
             {
                 "host": "127.0.0.1",
@@ -87,6 +68,21 @@
                 "https": true
             }
         ],
+
+        "stratum": {
+            "rpc": {
+                "host": "localhost",
+                "port": 1337,
+                "password": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+                "mode": "tcp"
+            },
+            "settings": {
+                "hostname": "localhost",
+                "toobusy": 70,
+                "host": "localhost",
+                "port": 3333
+            }
+        },
 
         "blockRefreshInterval": 1000,
         "jobRebroadcastTimeout": 55,
